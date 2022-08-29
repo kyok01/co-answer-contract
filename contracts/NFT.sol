@@ -23,7 +23,7 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     uint256 COMMENT_PRICE = 0.0001 ether;
 
     // structure of question nft
-    struct Props {
+    struct Question {
         address payable owner;
         string question;
     }
@@ -31,33 +31,27 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     // structure of answers
     struct Answer {
         uint256 tokenId;
-        uint256 answerId;
         address payable sender;
         string answerText;
-    }
-
-    struct Answers {
-        Answer[] answers;
     }
 
     // structure or comments
-    struct Comment {
-        uint256 tokenId;
-        uint256 answerId;
-        uint256 commentId;
-        address payable sender;
-        string answerText;
-    }
+    // struct Comment {
+    //     uint256 tokenId;
+    //     uint256 answerId;
+    //     uint256 commentId;
+    //     address payable sender;
+    //     string answerText;
+    // }
 
-    struct Comments {
-        Comment[] comments;
-    }
+    // struct Comments {
+    //     Comment[] comments;
+    // }
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
-    mapping(uint256 => Props) idToProps;
-    mapping(uint256 => Answers) idToAnswers;
-    mapping(uint256 => uint256) answerToId;
-    mapping(uint256 => Comments) answerToComments;
+    mapping(uint256 => Question) tokenIdToQuestion;
+    mapping(uint256 => Answer) answerIdToAnswer;
+    // mapping(uint256 => Comments) answerToComments;
 
     constructor() ERC721("CoAnswer", "CAS") {}
 
@@ -70,13 +64,17 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
 
-        idToProps[tokenId] = Props(payable(msg.sender), question);
+        tokenIdToQuestion[tokenId] = Question(payable(msg.sender), question);
 
         _setTokenURI(tokenId, getTokenURI(tokenId));
     }
 
-    function getPropsForId(uint256 tokenId) public view returns (Props memory) {
-        return idToProps[tokenId];
+    function getQuestionForId(uint256 tokenId)
+        public
+        view
+        returns (Question memory)
+    {
+        return tokenIdToQuestion[tokenId];
     }
 
     function generateImage(uint256 tokenId)
@@ -84,7 +82,7 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         view
         returns (string memory)
     {
-        string memory question = getPropsForId(tokenId).question;
+        string memory question = getQuestionForId(tokenId).question;
         bytes memory svg = abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
             "<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>",
@@ -136,54 +134,77 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         _answerIdCounter.increment();
         Answer memory _answer = Answer(
             tokenId,
-            answerId,
             payable(msg.sender),
             answerText
         );
-        idToAnswers[tokenId].answers.push(_answer);
-        answerToId[answerId] = tokenId;
+        answerIdToAnswer[answerId] = _answer;
     }
 
-    function getAnswers(uint256 tokenId) public view returns (Answer[] memory) {
-        console.log(
-            "sender",
-            idToAnswers[tokenId].answers[0].sender,
-            idToAnswers[tokenId].answers[1].sender
-        );
-        return idToAnswers[tokenId].answers;
+    function getAnswersForTokenId(uint256 tokenId) public view returns (Answer[] memory) {
+        uint totalAnswerCount = _answerIdCounter.current();
+        uint answerCount = 0;
+        uint currentIndex = 0;
+
+        for(uint i=0; i < totalAnswerCount; i++)
+        {
+            if(answerIdToAnswer[i].tokenId == tokenId){
+                answerCount += 1;
+            }
+        }
+
+        Answer[] memory answers = new Answer[](answerCount);
+        for(uint i=0; i < totalAnswerCount; i++) {
+            if(answerIdToAnswer[i].tokenId == tokenId) {
+                answers[currentIndex] = answerIdToAnswer[i];
+                currentIndex += 1;
+            }
+        }
+        return answers;
+    }
+
+    function getAllAnswers() public view returns (Answer[] memory) {
+        uint totalAnswerCount = _answerIdCounter.current();
+        uint currentIndex = 0;
+
+        Answer[] memory answers = new Answer[](totalAnswerCount);
+        for(uint i=0; i < totalAnswerCount; i++) {
+                answers[currentIndex] = answerIdToAnswer[i];
+                currentIndex += 1;
+        }
+        return answers;
     }
 
     /**
      * @dev function about comment
      */
-    function setComment(uint256 answerId, string memory commentText) public payable{
-        require(msg.value == COMMENT_PRICE);
-        uint256 commentId = _commentIdCounter.current();
-        _commentIdCounter.increment();
-        uint256 tokenId = answerToId[answerId];
+    // function setComment(uint256 answerId, string memory commentText) public payable{
+    //     require(msg.value == COMMENT_PRICE);
+    //     uint256 commentId = _commentIdCounter.current();
+    //     _commentIdCounter.increment();
+    //     uint256 tokenId = answerToId[answerId];
 
-        Comment memory _comment = Comment(
-            tokenId,
-            answerId,
-            commentId,
-            payable(msg.sender),
-            commentText
-        );
-        answerToComments[answerId].comments.push(_comment);
-    }
+    //     Comment memory _comment = Comment(
+    //         tokenId,
+    //         answerId,
+    //         commentId,
+    //         payable(msg.sender),
+    //         commentText
+    //     );
+    //     answerToComments[answerId].comments.push(_comment);
+    // }
 
-    function getComments(uint256 answerId)
-        public
-        view
-        returns (Comment[] memory)
-    {
-        console.log(
-            "sender",
-            answerToComments[answerId].comments[0].sender,
-            answerToComments[answerId].comments[1].sender
-        );
-        return answerToComments[answerId].comments;
-    }
+    // function getComments(uint256 answerId)
+    //     public
+    //     view
+    //     returns (Comment[] memory)
+    // {
+    //     console.log(
+    //         "sender",
+    //         answerToComments[answerId].comments[0].sender,
+    //         answerToComments[answerId].comments[1].sender
+    //     );
+    //     return answerToComments[answerId].comments;
+    // }
 
     /**
      * @dev helper function

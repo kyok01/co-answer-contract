@@ -14,7 +14,9 @@ describe("CAS contract", function () {
     await CASContract.safeMint(owner.address, "what is your name ?", { value: ethers.utils.parseEther("0.001") });
     await CASContract.connect(addr1).setAnswer(0, "kyok");
     await CASContract.connect(addr2).setAnswer(0, "taro");
-    await CASContract.getAnswers(0);
+    const arr = await CASContract.getAnswersForTokenId(0);
+    console.log(arr, typeof arr, arr[0][1], arr[0].sender);
     expect(await CASContract.ownerOf(0)).to.equal(owner.address);
+    expect(await CASContract.getAllAnswers()).to.deep.equal(await CASContract.getAnswersForTokenId(0)); //You want to use deep if you're trying to compare objects
   });
 });
