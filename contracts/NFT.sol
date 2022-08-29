@@ -17,14 +17,18 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     Counters.Counter private _tokenIdCounter;
     Counters.Counter private _answerIdCounter;
+    Counters.Counter private _commentIdCounter;
 
     uint256 MINT_PRICE = 0.001 ether;
+    uint256 COMMENT_PRICE = 0.0001 ether;
 
+    // structure of question nft
     struct Props {
         address payable owner;
         string question;
     }
 
+    // structure of answers
     struct Answer {
         uint256 tokenId;
         uint256 answerId;
@@ -36,9 +40,24 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         Answer[] answers;
     }
 
+    // structure or comments
+    struct Comment {
+        uint256 tokenId;
+        uint256 answerId;
+        uint256 commentId;
+        address payable sender;
+        string answerText;
+    }
+
+    struct Comments {
+        Comment[] comments;
+    }
+
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => Props) idToProps;
     mapping(uint256 => Answers) idToAnswers;
+    mapping(uint256 => uint256) answerToId;
+    mapping(uint256 => Comments) answerToComments;
 
     constructor() ERC721("CoAnswer", "CAS") {}
 
@@ -115,8 +134,14 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     function setAnswer(uint256 tokenId, string memory answerText) public {
         uint256 answerId = _answerIdCounter.current();
         _answerIdCounter.increment();
-        Answer memory _answer = Answer(tokenId, answerId, payable(msg.sender), answerText);
+        Answer memory _answer = Answer(
+            tokenId,
+            answerId,
+            payable(msg.sender),
+            answerText
+        );
         idToAnswers[tokenId].answers.push(_answer);
+        answerToId[answerId] = tokenId;
     }
 
     function getAnswers(uint256 tokenId) public view returns (Answer[] memory) {
@@ -126,6 +151,38 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
             idToAnswers[tokenId].answers[1].sender
         );
         return idToAnswers[tokenId].answers;
+    }
+
+    /**
+     * @dev function about comment
+     */
+    function setComment(uint256 answerId, string memory commentText) public payable{
+        require(msg.value == COMMENT_PRICE);
+        uint256 commentId = _commentIdCounter.current();
+        _commentIdCounter.increment();
+        uint256 tokenId = answerToId[answerId];
+
+        Comment memory _comment = Comment(
+            tokenId,
+            answerId,
+            commentId,
+            payable(msg.sender),
+            commentText
+        );
+        answerToComments[answerId].comments.push(_comment);
+    }
+
+    function getComments(uint256 answerId)
+        public
+        view
+        returns (Comment[] memory)
+    {
+        console.log(
+            "sender",
+            answerToComments[answerId].comments[0].sender,
+            answerToComments[answerId].comments[1].sender
+        );
+        return answerToComments[answerId].comments;
     }
 
     /**
