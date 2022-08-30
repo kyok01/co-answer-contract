@@ -35,23 +35,18 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         string answerText;
     }
 
-    // structure or comments
-    // struct Comment {
-    //     uint256 tokenId;
-    //     uint256 answerId;
-    //     uint256 commentId;
-    //     address payable sender;
-    //     string answerText;
-    // }
-
-    // struct Comments {
-    //     Comment[] comments;
-    // }
+    //structure or comments
+    struct Comment {
+        uint256 tokenId;
+        uint256 answerId;
+        address payable sender;
+        string answerText;
+    }
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => Question) tokenIdToQuestion;
     mapping(uint256 => Answer) answerIdToAnswer;
-    // mapping(uint256 => Comments) answerToComments;
+    mapping(uint256 => Comment) commentIdToComment;
 
     constructor() ERC721("CoAnswer", "CAS") {}
 
@@ -105,15 +100,15 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
             );
     }
 
-    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+    function getTokenURI(uint256 _tokenId) public view returns (string memory) {
         bytes memory dataURI = abi.encodePacked(
             "{",
             '"name": "Question #',
-            tokenId.toString(),
+            _tokenId.toString(),
             '",',
             '"description": "question description",',
             '"image": "',
-            generateImage(tokenId),
+            generateImage(_tokenId),
             '"',
             "}"
         );
@@ -129,32 +124,43 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     /**
      * @dev function about answering
      */
-    function setAnswer(uint256 tokenId, string memory answerText) public {
+    function setAnswer(uint256 _tokenId, string memory _answerText) public {
         uint256 answerId = _answerIdCounter.current();
         _answerIdCounter.increment();
         Answer memory _answer = Answer(
-            tokenId,
+            _tokenId,
             payable(msg.sender),
-            answerText
+            _answerText
         );
         answerIdToAnswer[answerId] = _answer;
     }
 
-    function getAnswersForTokenId(uint256 tokenId) public view returns (Answer[] memory) {
-        uint totalAnswerCount = _answerIdCounter.current();
-        uint answerCount = 0;
-        uint currentIndex = 0;
+    function getAnswerForAnswerId(uint256 _answerId)
+        public
+        view
+        returns (Answer memory)
+    {
+        return answerIdToAnswer[_answerId];
+    }
 
-        for(uint i=0; i < totalAnswerCount; i++)
-        {
-            if(answerIdToAnswer[i].tokenId == tokenId){
+    function getAnswersForTokenId(uint256 _tokenId)
+        public
+        view
+        returns (Answer[] memory)
+    {
+        uint256 totalAnswerCount = _answerIdCounter.current();
+        uint256 answerCount = 0;
+        uint256 currentIndex = 0;
+
+        for (uint256 i = 0; i < totalAnswerCount; i++) {
+            if (answerIdToAnswer[i].tokenId == _tokenId) {
                 answerCount += 1;
             }
         }
 
         Answer[] memory answers = new Answer[](answerCount);
-        for(uint i=0; i < totalAnswerCount; i++) {
-            if(answerIdToAnswer[i].tokenId == tokenId) {
+        for (uint256 i = 0; i < totalAnswerCount; i++) {
+            if (answerIdToAnswer[i].tokenId == _tokenId) {
                 answers[currentIndex] = answerIdToAnswer[i];
                 currentIndex += 1;
             }
@@ -163,13 +169,13 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     }
 
     function getAllAnswers() public view returns (Answer[] memory) {
-        uint totalAnswerCount = _answerIdCounter.current();
-        uint currentIndex = 0;
+        uint256 totalAnswerCount = _answerIdCounter.current();
+        uint256 currentIndex = 0;
 
         Answer[] memory answers = new Answer[](totalAnswerCount);
-        for(uint i=0; i < totalAnswerCount; i++) {
-                answers[currentIndex] = answerIdToAnswer[i];
-                currentIndex += 1;
+        for (uint256 i = 0; i < totalAnswerCount; i++) {
+            answers[currentIndex] = answerIdToAnswer[i];
+            currentIndex += 1;
         }
         return answers;
     }
@@ -177,34 +183,93 @@ contract CoAnswer is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     /**
      * @dev function about comment
      */
-    // function setComment(uint256 answerId, string memory commentText) public payable{
-    //     require(msg.value == COMMENT_PRICE);
-    //     uint256 commentId = _commentIdCounter.current();
-    //     _commentIdCounter.increment();
-    //     uint256 tokenId = answerToId[answerId];
+    function setComment(uint256 _answerId, string memory _commentText)
+        public
+        payable
+    {
+        require(msg.value == COMMENT_PRICE);
+        uint256 commentId = _commentIdCounter.current();
+        _commentIdCounter.increment();
+        uint256 tokenId = answerIdToAnswer[_answerId].tokenId;
 
-    //     Comment memory _comment = Comment(
-    //         tokenId,
-    //         answerId,
-    //         commentId,
-    //         payable(msg.sender),
-    //         commentText
-    //     );
-    //     answerToComments[answerId].comments.push(_comment);
-    // }
+        Comment memory _comment = Comment(
+            tokenId,
+            _answerId,
+            payable(msg.sender),
+            _commentText
+        );
+        commentIdToComment[commentId] = _comment;
+    }
 
-    // function getComments(uint256 answerId)
-    //     public
-    //     view
-    //     returns (Comment[] memory)
-    // {
-    //     console.log(
-    //         "sender",
-    //         answerToComments[answerId].comments[0].sender,
-    //         answerToComments[answerId].comments[1].sender
-    //     );
-    //     return answerToComments[answerId].comments;
-    // }
+    function getCommentForCommentId(uint256 _commentId)
+        public
+        view
+        returns (Comment memory)
+    {
+        return commentIdToComment[_commentId];
+    }
+
+    function getCommentsForAnswerId(uint256 _answerId)
+        public
+        view
+        returns (Comment[] memory)
+    {
+        uint256 totalCommentCount = _commentIdCounter.current();
+        uint256 currentIndex = 0;
+        uint256 commentCount = 0;
+
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            if (commentIdToComment[i].answerId == _answerId) {
+                commentCount += 1;
+            }
+        }
+
+        Comment[] memory comments = new Comment[](commentCount);
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            if (commentIdToComment[i].answerId == _answerId) {
+                comments[currentIndex] = commentIdToComment[i];
+                currentIndex += 1;
+            }
+        }
+        return comments;
+    }
+
+    function getCommentsForTokenId(uint256 _tokenId)
+        public
+        view
+        returns (Comment[] memory)
+    {
+        uint256 totalCommentCount = _commentIdCounter.current();
+        uint256 currentIndex = 0;
+        uint256 commentCount = 0;
+
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            if (commentIdToComment[i].tokenId == _tokenId) {
+                commentCount += 1;
+            }
+        }
+
+        Comment[] memory comments = new Comment[](commentCount);
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            if (commentIdToComment[i].tokenId == _tokenId) {
+                comments[currentIndex] = commentIdToComment[i];
+                currentIndex += 1;
+            }
+        }
+        return comments;
+    }
+
+    function getAllComments() public view returns (Comment[] memory) {
+        uint256 totalCommentCount = _commentIdCounter.current();
+        uint256 currentIndex = 0;
+
+        Comment[] memory comments = new Comment[](totalCommentCount);
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            comments[currentIndex] = commentIdToComment[i];
+            currentIndex += 1;
+        }
+        return comments;
+    }
 
     /**
      * @dev helper function
