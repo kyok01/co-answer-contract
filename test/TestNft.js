@@ -20,10 +20,13 @@ describe("CAS contract", function () {
     const arr = await CASContract.getAnswersForTokenId(0);
     console.log(arr, typeof arr, arr[0][1], arr[0].sender);
     expect(await CASContract.ownerOf(0)).to.equal(owner.address);
-    // expect(await CASContract.getAllAnswers()).to.deep.equal(await CASContract.getAnswersForTokenId(0)); //You want to use deep if you're trying to compare objects
+    expect(await CASContract.getAllAnswers()).to.deep.equal(await CASContract.getAnswersForTokenId(0)); //You want to use deep if you're trying to compare objects
 
-    // await CASContract.connect(addr1).setComment(0, "kyok", {value: ethers.utils.parseEther("0.0001")});
-    // await CASContract.connect(addr2).setComment(0, "taro", {value: ethers.utils.parseEther("0.0001")});
-    // expect(await CASContract.getAllComments()).to.deep.equal(await CASContract.getCommentsForTokenId(0)); //You want to use deep if you're trying to compare objects
+    await CASContract.setComment(0, "first");
+    await CASContract.connect(addr1).setComment(0, "kyok", {value: ethers.utils.parseEther("0.0001")});
+    await CASContract.connect(addr2).setComment(0, "taro", {value: ethers.utils.parseEther("0.0001")});
+    const comments = await CASContract.getAllComments();
+    console.log(comments);
+    expect(await CASContract.getAllComments()).to.deep.equal(await CASContract.getCommentsForTokenId(0)); //You want to use deep if you're trying to compare objects
   });
 });

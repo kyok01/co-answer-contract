@@ -28,7 +28,9 @@ contract QACContract is QAContract {
         public
         payable
     {
-        require(msg.value == COMMENT_PRICE);
+        if (msg.sender != ownerOf(answerIdToAnswer[_answerId].tokenId)) {
+            require(msg.value == COMMENT_PRICE);
+        }
         uint256 commentId = _commentIdCounter.current();
         _commentIdCounter.increment();
         uint256 tokenId = answerIdToAnswer[_answerId].tokenId;
