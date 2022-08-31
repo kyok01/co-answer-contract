@@ -6,7 +6,7 @@ describe("CAS contract", function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
     console.log("addresses", owner.address, addr1.address, addr2.address);
 
-    const CoAnswer = await ethers.getContractFactory("CoAnswer");
+    const CoAnswer = await ethers.getContractFactory("QACContract");
 
     const CASContract = await CoAnswer.deploy();
     await CASContract.deployed();
