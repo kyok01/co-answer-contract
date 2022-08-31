@@ -23,8 +23,8 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
     struct Question {
         address payable owner;
         string text;
-        // uint256 mintPrice;
-        // uint expires;
+        uint256 mintPrice;
+        uint expires; // unix seconds
     }
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
@@ -35,13 +35,13 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
     /**
      * function about mint QuestionNft
      */
-    function safeMint(address to, string memory questionText) public payable {
-        require(msg.value == MINT_PRICE);
+    function safeMint(address to, string memory questionText, uint256 _mintPrice, uint _expires) public payable {
+        require(msg.value == _mintPrice);
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
 
-        tokenIdToQ[tokenId] = Question(payable(msg.sender), questionText);
+        tokenIdToQ[tokenId] = Question(payable(msg.sender), questionText, _mintPrice, _expires);
 
         _setTokenURI(tokenId, getTokenURI(tokenId));
     }
