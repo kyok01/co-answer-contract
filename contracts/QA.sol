@@ -7,37 +7,76 @@ contract QAContract is QuestionContract {
     using Counters for Counters.Counter;
 
     Counters.Counter private _answerIdCounter;
+    Counters.Counter private _rIdCounter;
 
     // structure of answers
     struct Answer {
         uint256 tokenId;
         address payable sender;
-        string answerText;
+        string aText;
+        uint256 rId;
+    }
+
+    struct Ref {
+        string qacType;
+        uint256 qacId;
+        address qacSender;
     }
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
-    mapping(uint256 => Answer) answerIdToAnswer;
+    mapping(uint256 => Answer) aIdToAnswer;
+    mapping(uint256 => Ref) rIdToRef;
 
     /**
      * @dev function about answering
      */
-    function setAnswer(uint256 _tokenId, string memory _answerText) public {
-        uint256 answerId = _answerIdCounter.current();
+    function setAnswer(
+        uint256 _tokenId,
+        string memory _aText,
+        string memory _qacType,
+        uint256 _qacId,
+        address _qacSender
+    ) public isValidToken(_tokenId) {
+        uint256 aId = _answerIdCounter.current();
         _answerIdCounter.increment();
+
+        uint256 _rId = _setRef(_qacType, _qacId, _qacSender);
+        
         Answer memory _answer = Answer(
             _tokenId,
             payable(msg.sender),
-            _answerText
+            _aText,
+            _rId
         );
-        answerIdToAnswer[answerId] = _answer;
+        aIdToAnswer[aId] = _answer;
     }
 
-    function getAnswerForAnswerId(uint256 _answerId)
+    function _setRef(
+        string memory _qacType,
+        uint256 _qacId,
+        address _qacSender
+    ) internal returns (uint256) {
+        uint256 _rId = _rIdCounter.current();
+        _rIdCounter.increment();
+        rIdToRef[_rId] = Ref(_qacType, _qacId, _qacSender);
+        return _rId;
+    }
+
+    modifier isValidToken(uint256 _tokenId) {
+        console.log(block.timestamp);
+        require(
+            block.timestamp < tokenIdToQ[_tokenId].expires,
+            "This Quesction expired."
+        );
+        _;
+    }
+
+    function getAnswerForAnswerId(uint256 _aId)
         public
         view
         returns (Answer memory)
     {
-        return answerIdToAnswer[_answerId];
+        return aIdToAnswer[_aId];
     }
 
     function getAnswersForTokenId(uint256 _tokenId)
@@ -50,15 +89,15 @@ contract QAContract is QuestionContract {
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < totalAnswerCount; i++) {
-            if (answerIdToAnswer[i].tokenId == _tokenId) {
+            if (aIdToAnswer[i].tokenId == _tokenId) {
                 answerCount += 1;
             }
         }
 
         Answer[] memory answers = new Answer[](answerCount);
         for (uint256 i = 0; i < totalAnswerCount; i++) {
-            if (answerIdToAnswer[i].tokenId == _tokenId) {
-                answers[currentIndex] = answerIdToAnswer[i];
+            if (aIdToAnswer[i].tokenId == _tokenId) {
+                answers[currentIndex] = aIdToAnswer[i];
                 currentIndex += 1;
             }
         }
@@ -71,7 +110,7 @@ contract QAContract is QuestionContract {
 
         Answer[] memory answers = new Answer[](totalAnswerCount);
         for (uint256 i = 0; i < totalAnswerCount; i++) {
-            answers[currentIndex] = answerIdToAnswer[i];
+            answers[currentIndex] = aIdToAnswer[i];
             currentIndex += 1;
         }
         return answers;

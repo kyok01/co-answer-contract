@@ -27,13 +27,14 @@ contract QACContract is QAContract {
     function setComment(uint256 _answerId, string memory _commentText)
         public
         payable
+        isValidToken(aIdToAnswer[_answerId].tokenId)
     {
-        if (msg.sender != ownerOf(answerIdToAnswer[_answerId].tokenId)) {
+        if (msg.sender != ownerOf(aIdToAnswer[_answerId].tokenId)) {
             require(msg.value == COMMENT_PRICE);
         }
         uint256 commentId = _commentIdCounter.current();
         _commentIdCounter.increment();
-        uint256 tokenId = answerIdToAnswer[_answerId].tokenId;
+        uint256 tokenId = aIdToAnswer[_answerId].tokenId;
 
         Comment memory _comment = Comment(
             tokenId,

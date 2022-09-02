@@ -11,12 +11,13 @@ describe("CAS contract", function () {
     const CASContract = await CoAnswer.deploy();
     await CASContract.deployed();
 
-    let d = new Date(Date.UTC(2022, 8, 1, 12, 00, 00));
+    let d = new Date(Date.UTC(2023, 8, 4, 12, 00, 00));
     const unixS = d.getTime()/1000;
+    console.log('unixS' + unixS);
 
     await CASContract.safeMint(owner.address, "what is your name ?", ethers.utils.parseEther("0.001"), unixS, { value: ethers.utils.parseEther("0.001") });
-    await CASContract.connect(addr1).setAnswer(0, "kyok");
-    await CASContract.connect(addr2).setAnswer(0, "taro");
+    await CASContract.connect(addr1).setAnswer(0, "kyok", "a", 1, addr2.address);
+    await CASContract.connect(addr2).setAnswer(0, "taro", "a", 1, addr1.address);
     const arr = await CASContract.getAnswersForTokenId(0);
     console.log(arr, typeof arr, arr[0][1], arr[0].sender);
     expect(await CASContract.ownerOf(0)).to.equal(owner.address);
