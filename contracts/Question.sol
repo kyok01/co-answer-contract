@@ -21,7 +21,7 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
 
     // structure of question nft
     struct Question {
-        address payable owner;
+        address payable sender;
         string text;
         uint256 mintPrice;
         uint expires; // unix seconds

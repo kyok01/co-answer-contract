@@ -11,7 +11,7 @@ module.exports = {
   solidity: "0.8.9",
   // defaultNetwork: "goerli",
   networks: {
-      // hardhat: {allowUnlimitedContractSize: true,},
+      hardhat: {allowUnlimitedContractSize: true,},
       goerli: {
          url: API_URL,
          accounts: [`0x${PRIVATE_KEY}`]
