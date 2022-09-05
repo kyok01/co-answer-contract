@@ -35,9 +35,9 @@ describe("Co-Answer contract", function () {
     addr1Balance = await ethers.provider.getBalance(addr1.address);
     console.dir('addr1=' + addr1Balance);
 
-    await CASContract.setComment(0, "first");
-    await CASContract.connect(addr1).setComment(0, "kyok", {value: ethers.utils.parseEther("0.0001")});
-    await CASContract.connect(addr2).setComment(0, "taro", {value: ethers.utils.parseEther("0.0001")});
+    await CASContract.setComment(0, "first", 0);
+    await CASContract.connect(addr1).setComment(0, "kyok", ethers.utils.parseEther("0.0001"), {value: ethers.utils.parseEther("0.0001")});
+    await CASContract.connect(addr2).setComment(0, "taro", ethers.utils.parseEther("0.0003"), {value: ethers.utils.parseEther("0.0003")});
     const comments = await CASContract.getAllComments();
     // console.log(comments);
     expect(await CASContract.getAllComments()).to.deep.equal(await CASContract.getCommentsForTokenId(0)); //You want to use deep if you're trying to compare objects

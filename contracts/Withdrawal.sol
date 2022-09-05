@@ -70,7 +70,7 @@ contract WithdrawalContract is BestAnswerContract {
         uint256 totalCommentCount = comments.length;
         uint cScore = 0;
         for (uint256 i = 0; i < totalCommentCount; i++) {
-            cScore += sqrt(COMMENT_PRICE);
+            cScore += sqrt(comments[i].price);
         }
         return (qScore + cScore) ** 2;
     }

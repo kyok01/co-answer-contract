@@ -16,6 +16,7 @@ contract QACContract is QAContract {
         uint256 answerId;
         address payable sender;
         string answerText;
+        uint256 price;
     }
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
@@ -24,13 +25,14 @@ contract QACContract is QAContract {
     /**
      * @dev function about comment
      */
-    function setComment(uint256 _answerId, string memory _commentText)
+    function setComment(uint256 _answerId, string memory _commentText, uint256 _price)
         public
         payable
         isValidToken(aIdToAnswer[_answerId].tokenId)
     {
         if (msg.sender != ownerOf(aIdToAnswer[_answerId].tokenId)) {
-            require(msg.value == COMMENT_PRICE);
+            require(msg.value >= COMMENT_PRICE);
+            require(msg.value == _price);
         }
         uint256 commentId = _commentIdCounter.current();
         _commentIdCounter.increment();
@@ -40,7 +42,8 @@ contract QACContract is QAContract {
             tokenId,
             _answerId,
             payable(msg.sender),
-            _commentText
+            _commentText,
+            _price
         );
         commentIdToComment[commentId] = _comment;
     }
