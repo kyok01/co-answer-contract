@@ -63,7 +63,7 @@ contract QAContract is QuestionContract {
     }
 
     modifier isValidToken(uint256 _tokenId) {
-        console.log(block.timestamp);
+        // console.log(block.timestamp);
         require(
             block.timestamp < tokenIdToQ[_tokenId].expires,
             "This Quesction expired."

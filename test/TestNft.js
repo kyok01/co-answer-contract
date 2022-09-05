@@ -1,6 +1,6 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
+const { ethers } = require("hardhat");
 
 describe("Co-Answer contract", function () {
   async function deployTokenFixture() {
@@ -17,6 +17,9 @@ describe("Co-Answer contract", function () {
   it("NFT mint", async function () {
     const {CASContract, owner, addr1, addr2} = await loadFixture(deployTokenFixture);
 
+    let addr1Balance = await ethers.provider.getBalance(addr1.address);
+    console.dir('addr1=' + addr1Balance);
+
     let d = new Date(Date.UTC(2023, 8, 6, 12, 00, 00));
     const unixS = d.getTime()/1000;
     // console.log('unixS' + unixS);
@@ -29,6 +32,9 @@ describe("Co-Answer contract", function () {
     expect(await CASContract.ownerOf(0)).to.equal(owner.address);
     expect(await CASContract.getAllAnswers()).to.deep.equal(await CASContract.getAnswersForTokenId(0)); //You want to use deep if you're trying to compare objects
 
+    addr1Balance = await ethers.provider.getBalance(addr1.address);
+    console.dir('addr1=' + addr1Balance);
+    
     await CASContract.setComment(0, "first");
     await CASContract.connect(addr1).setComment(0, "kyok", {value: ethers.utils.parseEther("0.0001")});
     await CASContract.connect(addr2).setComment(0, "taro", {value: ethers.utils.parseEther("0.0001")});
@@ -42,9 +48,12 @@ describe("Co-Answer contract", function () {
     expect(parseInt(bA.aId._hex, 16)).to.equal(1);
 
     const amount = await CASContract.connect(addr1).getWithdrawableAmount();
+    addr1Balance = await ethers.provider.getBalance(addr1.address);
+    console.dir('addr1=' + addr1Balance);
+
     await CASContract.connect(addr1).withdraw();
     console.log(amount.toString());
-    const addr1Balance = await ethers.getDefaultProvider().getBalance(addr1.address);
-    console.dir('addr1' + addr1Balance)
+    addr1Balance = await ethers.provider.getBalance(addr1.address);
+    console.dir('addr1=' + addr1Balance)
   });
 });
