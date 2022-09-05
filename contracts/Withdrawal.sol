@@ -63,4 +63,24 @@ contract WithdrawalContract is BestAnswerContract {
         require(amount > 0, "Your withdrawableAmount is 0.");
         payable(msg.sender).transfer(amount);
     }
+
+    function getScore(uint256 _tokenId) public view returns (uint) {
+        uint qScore = sqrt(tokenIdToQ[_tokenId].mintPrice);
+        Comment[] memory comments = getCommentsForTokenId(_tokenId);
+        uint256 totalCommentCount = comments.length;
+        uint cScore = 0;
+        for (uint256 i = 0; i < totalCommentCount; i++) {
+            cScore += sqrt(COMMENT_PRICE);
+        }
+        return (qScore + cScore) ** 2;
+    }
+
+    function sqrt(uint x) private pure returns (uint y) {
+    uint z = (x + 1) / 2;
+    y = x;
+    while (z < y) {
+        y = z;
+        z = (x / z + z) / 2;
+    }
+}
 }

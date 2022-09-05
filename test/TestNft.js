@@ -34,7 +34,7 @@ describe("Co-Answer contract", function () {
 
     addr1Balance = await ethers.provider.getBalance(addr1.address);
     console.dir('addr1=' + addr1Balance);
-    
+
     await CASContract.setComment(0, "first");
     await CASContract.connect(addr1).setComment(0, "kyok", {value: ethers.utils.parseEther("0.0001")});
     await CASContract.connect(addr2).setComment(0, "taro", {value: ethers.utils.parseEther("0.0001")});
@@ -54,6 +54,7 @@ describe("Co-Answer contract", function () {
     await CASContract.connect(addr1).withdraw();
     console.log(amount.toString());
     addr1Balance = await ethers.provider.getBalance(addr1.address);
-    console.dir('addr1=' + addr1Balance)
+    console.dir('addr1=' + addr1Balance);
+    console.dir(await CASContract.getScore(0));
   });
 });

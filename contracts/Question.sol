@@ -17,8 +17,6 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
 
     Counters.Counter private _tokenIdCounter;
 
-    uint256 MINT_PRICE = 0.001 ether;
-
     // structure of question nft
     struct Question {
         address payable sender;
