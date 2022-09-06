@@ -7,8 +7,9 @@ contract QACContract is QAContract {
     using Counters for Counters.Counter;
 
     Counters.Counter private _commentIdCounter;
+    Counters.Counter internal _repIdCounter;
 
-    uint256 COMMENT_PRICE = 0.0001 ether;
+    uint256 COMMENT_BOTTOM_PRICE = 0.0001 ether;
 
     //structure or comments
     struct Comment {
@@ -19,8 +20,14 @@ contract QACContract is QAContract {
         uint256 price;
     }
 
+    struct Reply {
+        uint256 cId;
+        bool repHasWithdrawn;
+    }
+
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => Comment) commentIdToComment;
+    mapping(uint256 => Reply) repIdToReply;
 
     /**
      * @dev function about comment
@@ -31,7 +38,7 @@ contract QACContract is QAContract {
         isValidToken(aIdToAnswer[_answerId].tokenId)
     {
         if (msg.sender != ownerOf(aIdToAnswer[_answerId].tokenId)) {
-            require(msg.value >= COMMENT_PRICE);
+            require(msg.value >= COMMENT_BOTTOM_PRICE);
             require(msg.value == _price);
         }
         uint256 commentId = _commentIdCounter.current();
@@ -56,30 +63,30 @@ contract QACContract is QAContract {
         return commentIdToComment[_commentId];
     }
 
-    function getCommentsForAnswerId(uint256 _answerId)
-        public
-        view
-        returns (Comment[] memory)
-    {
-        uint256 totalCommentCount = _commentIdCounter.current();
-        uint256 currentIndex = 0;
-        uint256 commentCount = 0;
+    // function getCommentsForAnswerId(uint256 _answerId)
+    //     public
+    //     view
+    //     returns (Comment[] memory)
+    // {
+    //     uint256 totalCommentCount = _commentIdCounter.current();
+    //     uint256 currentIndex = 0;
+    //     uint256 commentCount = 0;
 
-        for (uint256 i = 0; i < totalCommentCount; i++) {
-            if (commentIdToComment[i].answerId == _answerId) {
-                commentCount += 1;
-            }
-        }
+    //     for (uint256 i = 0; i < totalCommentCount; i++) {
+    //         if (commentIdToComment[i].answerId == _answerId) {
+    //             commentCount += 1;
+    //         }
+    //     }
 
-        Comment[] memory comments = new Comment[](commentCount);
-        for (uint256 i = 0; i < totalCommentCount; i++) {
-            if (commentIdToComment[i].answerId == _answerId) {
-                comments[currentIndex] = commentIdToComment[i];
-                currentIndex += 1;
-            }
-        }
-        return comments;
-    }
+    //     Comment[] memory comments = new Comment[](commentCount);
+    //     for (uint256 i = 0; i < totalCommentCount; i++) {
+    //         if (commentIdToComment[i].answerId == _answerId) {
+    //             comments[currentIndex] = commentIdToComment[i];
+    //             currentIndex += 1;
+    //         }
+    //     }
+    //     return comments;
+    // }
 
     function getCommentsForTokenId(uint256 _tokenId)
         public
@@ -116,5 +123,45 @@ contract QACContract is QAContract {
             currentIndex += 1;
         }
         return comments;
+    }
+
+    /**
+     * @dev function about reply
+     */
+    function setRep(uint256 _cId)
+        public
+        isValidToken(aIdToAnswer[commentIdToComment[_cId].answerId].tokenId)
+    {
+        if (msg.sender != ownerOf(aIdToAnswer[commentIdToComment[_cId].answerId].tokenId)) {
+            require(msg.sender == aIdToAnswer[commentIdToComment[_cId].answerId].sender);
+        }
+        uint256 repId = _repIdCounter.current();
+        _repIdCounter.increment();
+
+        Reply memory _reply = Reply(
+            _cId,
+            false
+        );
+        repIdToReply[repId] = _reply;
+    }
+
+    function getReplyForRepId(uint256 _repId)
+        public
+        view
+        returns (Reply memory)
+    {
+        return repIdToReply[_repId];
+    }
+
+    function getAllReplies() public view returns (Reply[] memory) {
+        uint256 totalRepCount = _repIdCounter.current();
+        uint256 currentIndex = 0;
+
+        Reply[] memory replies = new Reply[](totalRepCount);
+        for (uint256 i = 0; i < totalRepCount; i++) {
+            replies[currentIndex] = repIdToReply[i];
+            currentIndex += 1;
+        }
+        return replies;
     }
 }

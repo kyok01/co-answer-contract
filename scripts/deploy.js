@@ -1,11 +1,11 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Comment = await ethers.getContractFactory("Comment");
+  const ContractFactory = await ethers.getContractFactory("WithdrawalContract");
 
   // Start deployment, returning a promise that resolves to a contract object
-  const CommentContract = await Comment.deploy();   
-  console.log("Contract deployed to address:", CommentContract.address);
+  const Contract = await ContractFactory.deploy();   
+  console.log("Contract deployed to address:", Contract.address);
 }
 
 main()

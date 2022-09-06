@@ -7,6 +7,7 @@ contract WithdrawalContract is BestAnswerContract {
     using Counters for Counters.Counter;
 
     function getWithdrawableAmount() public view returns (uint256) {
+        // bestAnswer
         uint256 totalBACount = _bAIdCounter.current();
         uint256 amount = 0;
 
@@ -21,7 +22,8 @@ contract WithdrawalContract is BestAnswerContract {
                     100;
             } else if (
                 !bAIdToBestAnswer[i].rHasWithdrawn &&
-                rIdToRef[aIdToAnswer[bAIdToBestAnswer[i].aId].rId].qacSender ==
+                refIdToRef[aIdToAnswer[bAIdToBestAnswer[i].aId].refId]
+                    .qacSender ==
                 msg.sender
             ) {
                 amount +=
@@ -30,10 +32,25 @@ contract WithdrawalContract is BestAnswerContract {
                     100;
             }
         }
+
+        // reply
+        uint256 totalRepCount = _repIdCounter.current();
+        for (uint256 i = 0; i < totalRepCount; i++) {
+            if (
+                !repIdToReply[i].repHasWithdrawn &&
+                aIdToAnswer[commentIdToComment[repIdToReply[i].cId].answerId]
+                    .sender ==
+                msg.sender
+            ) {
+                amount += commentIdToComment[repIdToReply[i].cId].price;
+            }
+        }
+
         return amount;
     }
 
     function withdraw() public payable {
+        // bestanswer
         uint256 totalBACount = _bAIdCounter.current();
         uint256 amount = 0;
 
@@ -49,7 +66,8 @@ contract WithdrawalContract is BestAnswerContract {
                 bAIdToBestAnswer[i].aHasWithdrawn = true;
             } else if (
                 !bAIdToBestAnswer[i].rHasWithdrawn &&
-                rIdToRef[aIdToAnswer[bAIdToBestAnswer[i].aId].rId].qacSender ==
+                refIdToRef[aIdToAnswer[bAIdToBestAnswer[i].aId].refId]
+                    .qacSender ==
                 msg.sender
             ) {
                 amount +=
@@ -57,6 +75,19 @@ contract WithdrawalContract is BestAnswerContract {
                         bARPercentage) /
                     100;
                 bAIdToBestAnswer[i].rHasWithdrawn = true;
+            }
+        }
+
+        // reply
+        uint256 totalRepCount = _repIdCounter.current();
+        for (uint256 i = 0; i < totalRepCount; i++) {
+            if (
+                !repIdToReply[i].repHasWithdrawn &&
+                aIdToAnswer[commentIdToComment[repIdToReply[i].cId].answerId]
+                    .sender ==
+                msg.sender
+            ) {
+                amount += commentIdToComment[repIdToReply[i].cId].price;
             }
         }
 
@@ -72,15 +103,15 @@ contract WithdrawalContract is BestAnswerContract {
         for (uint256 i = 0; i < totalCommentCount; i++) {
             cScore += sqrt(comments[i].price);
         }
-        return (qScore + cScore) ** 2;
+        return (qScore + cScore)**2;
     }
 
     function sqrt(uint x) private pure returns (uint y) {
-    uint z = (x + 1) / 2;
-    y = x;
-    while (z < y) {
-        y = z;
-        z = (x / z + z) / 2;
+        uint z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
     }
-}
 }

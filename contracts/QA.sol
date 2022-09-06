@@ -7,14 +7,14 @@ contract QAContract is QuestionContract {
     using Counters for Counters.Counter;
 
     Counters.Counter private _answerIdCounter;
-    Counters.Counter private _rIdCounter;
+    Counters.Counter private _refIdCounter;
 
     // structure of answers
     struct Answer {
         uint256 tokenId;
         address payable sender;
         string aText;
-        uint256 rId;
+        uint256 refId;
     }
 
     struct Ref {
@@ -25,7 +25,7 @@ contract QAContract is QuestionContract {
 
     //This mapping maps tokenId to token info and is helpful when retrieving details about a tokenId
     mapping(uint256 => Answer) aIdToAnswer;
-    mapping(uint256 => Ref) rIdToRef;
+    mapping(uint256 => Ref) refIdToRef;
 
     /**
      * @dev function about answering
@@ -40,13 +40,13 @@ contract QAContract is QuestionContract {
         uint256 aId = _answerIdCounter.current();
         _answerIdCounter.increment();
 
-        uint256 _rId = _setRef(_qacType, _qacId, _qacSender);
+        uint256 _refId = _setRef(_qacType, _qacId, _qacSender);
         
         Answer memory _answer = Answer(
             _tokenId,
             payable(msg.sender),
             _aText,
-            _rId
+            _refId
         );
         aIdToAnswer[aId] = _answer;
     }
@@ -56,10 +56,10 @@ contract QAContract is QuestionContract {
         uint256 _qacId,
         address _qacSender
     ) internal returns (uint256) {
-        uint256 _rId = _rIdCounter.current();
-        _rIdCounter.increment();
-        rIdToRef[_rId] = Ref(_qacType, _qacId, _qacSender);
-        return _rId;
+        uint256 _refId = _refIdCounter.current();
+        _refIdCounter.increment();
+        refIdToRef[_refId] = Ref(_qacType, _qacId, _qacSender);
+        return _refId;
     }
 
     modifier isValidToken(uint256 _tokenId) {
@@ -79,30 +79,30 @@ contract QAContract is QuestionContract {
         return aIdToAnswer[_aId];
     }
 
-    function getAnswersForTokenId(uint256 _tokenId)
-        public
-        view
-        returns (Answer[] memory)
-    {
-        uint256 totalAnswerCount = _answerIdCounter.current();
-        uint256 answerCount = 0;
-        uint256 currentIndex = 0;
+    // function getAnswersForTokenId(uint256 _tokenId)
+    //     public
+    //     view
+    //     returns (Answer[] memory)
+    // {
+    //     uint256 totalAnswerCount = _answerIdCounter.current();
+    //     uint256 answerCount = 0;
+    //     uint256 currentIndex = 0;
 
-        for (uint256 i = 0; i < totalAnswerCount; i++) {
-            if (aIdToAnswer[i].tokenId == _tokenId) {
-                answerCount += 1;
-            }
-        }
+    //     for (uint256 i = 0; i < totalAnswerCount; i++) {
+    //         if (aIdToAnswer[i].tokenId == _tokenId) {
+    //             answerCount += 1;
+    //         }
+    //     }
 
-        Answer[] memory answers = new Answer[](answerCount);
-        for (uint256 i = 0; i < totalAnswerCount; i++) {
-            if (aIdToAnswer[i].tokenId == _tokenId) {
-                answers[currentIndex] = aIdToAnswer[i];
-                currentIndex += 1;
-            }
-        }
-        return answers;
-    }
+    //     Answer[] memory answers = new Answer[](answerCount);
+    //     for (uint256 i = 0; i < totalAnswerCount; i++) {
+    //         if (aIdToAnswer[i].tokenId == _tokenId) {
+    //             answers[currentIndex] = aIdToAnswer[i];
+    //             currentIndex += 1;
+    //         }
+    //     }
+    //     return answers;
+    // }
 
     function getAllAnswers() public view returns (Answer[] memory) {
         uint256 totalAnswerCount = _answerIdCounter.current();
