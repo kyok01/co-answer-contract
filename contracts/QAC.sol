@@ -63,31 +63,6 @@ contract QACContract is QAContract {
         return commentIdToComment[_commentId];
     }
 
-    // function getCommentsForAnswerId(uint256 _answerId)
-    //     public
-    //     view
-    //     returns (Comment[] memory)
-    // {
-    //     uint256 totalCommentCount = _commentIdCounter.current();
-    //     uint256 currentIndex = 0;
-    //     uint256 commentCount = 0;
-
-    //     for (uint256 i = 0; i < totalCommentCount; i++) {
-    //         if (commentIdToComment[i].answerId == _answerId) {
-    //             commentCount += 1;
-    //         }
-    //     }
-
-    //     Comment[] memory comments = new Comment[](commentCount);
-    //     for (uint256 i = 0; i < totalCommentCount; i++) {
-    //         if (commentIdToComment[i].answerId == _answerId) {
-    //             comments[currentIndex] = commentIdToComment[i];
-    //             currentIndex += 1;
-    //         }
-    //     }
-    //     return comments;
-    // }
-
     function getCommentsForTokenId(uint256 _tokenId)
         public
         view
