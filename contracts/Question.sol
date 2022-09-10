@@ -41,7 +41,7 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
 
         tokenIdToQ[tokenId] = Question(payable(msg.sender), questionText, _mintPrice, _expires);
 
-        _setTokenURI(tokenId, getTokenURI(tokenId));
+        _setTokenURI(tokenId, "aaa");
     }
 
     function getQuestionForId(uint256 tokenId)
@@ -50,55 +50,6 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
         returns (Question memory)
     {
         return tokenIdToQ[tokenId];
-    }
-
-    function generateImage(uint256 tokenId)
-        public
-        view
-        returns (string memory)
-    {
-        string memory question = getQuestionForId(tokenId).text;
-        bytes memory svg = abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
-            "<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>",
-            '<rect width="100%" height="100%" fill="black" />',
-            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">',
-            "Warrior",
-            "</text>",
-            '<text x="50%" y="50%" class="base" dominant-baseline="middle" text-anchor="middle">',
-            "Question: ",
-            question,
-            "</text>",
-            "</svg>"
-        );
-        return
-            string(
-                abi.encodePacked(
-                    "data:image/svg+xml;base64,",
-                    Base64.encode(svg)
-                )
-            );
-    }
-
-    function getTokenURI(uint256 _tokenId) public view returns (string memory) {
-        bytes memory dataURI = abi.encodePacked(
-            "{",
-            '"name": "Question #',
-            _tokenId.toString(),
-            '",',
-            '"description": "question description",',
-            '"image": "',
-            generateImage(_tokenId),
-            '"',
-            "}"
-        );
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(dataURI)
-                )
-            );
     }
 
     /**

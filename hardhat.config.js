@@ -1,5 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
-require('dotenv').config();
+require("dotenv").config();
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 
@@ -8,16 +8,24 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.9",
+  solidity: {
+    version: "0.8.9",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   // defaultNetwork: "goerli",
   networks: {
-      hardhat: {allowUnlimitedContractSize: true,},
-      goerli: {
-         url: API_URL,
-         accounts: [`0x${PRIVATE_KEY}`]
-      }
+    // hardhat: { allowUnlimitedContractSize: true },
+    goerli: {
+      url: API_URL,
+      accounts: [`0x${PRIVATE_KEY}`],
+    },
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY
-  }
+    apiKey: ETHERSCAN_API_KEY,
+  },
 };

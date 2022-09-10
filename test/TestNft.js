@@ -21,7 +21,7 @@ describe("Co-Answer contract", function () {
     console.dir('addr1=' + addr1Balance);
 
     // ===Question===
-    let d = new Date(Date.UTC(2023, 8, 8, 12, 00, 00));
+    let d = new Date(Date.UTC(2023, 8, 30, 12, 00, 00));
     const unixS = d.getTime()/1000;
     // console.log('unixS' + unixS);
 
