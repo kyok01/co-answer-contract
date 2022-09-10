@@ -19,7 +19,7 @@ module.exports = {
   },
   // defaultNetwork: "goerli",
   networks: {
-    hardhat: { allowUnlimitedContractSize: true },
+    // hardhat: { allowUnlimitedContractSize: true },
     goerli: {
       url: API_URL,
       accounts: [`0x${PRIVATE_KEY}`],
