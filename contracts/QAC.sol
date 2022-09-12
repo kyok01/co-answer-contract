@@ -16,7 +16,7 @@ contract QACContract is QAContract {
         uint256 tokenId;
         uint256 answerId;
         address payable sender;
-        string answerText;
+        string text;
         uint256 price;
     }
 

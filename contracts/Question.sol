@@ -52,6 +52,18 @@ contract QuestionContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable
         return tokenIdToQ[tokenId];
     }
 
+    function getAllQuestions() public view returns (Question[] memory) {
+        uint256 totalQuestionCount = _tokenIdCounter.current();
+        uint256 currentIndex = 0;
+
+        Question[] memory questions = new Question[](totalQuestionCount);
+        for (uint256 i = 0; i < totalQuestionCount; i++) {
+            questions[currentIndex] = tokenIdToQ[i];
+            currentIndex += 1;
+        }
+        return questions;
+    }
+
     /**
      * @dev helper function
      */
