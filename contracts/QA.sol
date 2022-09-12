@@ -13,7 +13,7 @@ contract QAContract is QuestionContract {
     struct Answer {
         uint256 tokenId;
         address payable sender;
-        string aText;
+        string text;
         uint256 refId;
     }
 
