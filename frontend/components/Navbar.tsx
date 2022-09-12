@@ -19,6 +19,7 @@ const [currAddress, updateAddress] = useState('0x');
 async function getAddress() {
   const ethers = require("ethers");
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send('eth_requestAccounts', []);
   const signer = provider.getSigner();
   const addr = await signer.getAddress();
   updateAddress(addr);
