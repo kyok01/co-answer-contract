@@ -1,8 +1,9 @@
-import Artifact from "../contracts/WithdrawalContract.json";
-import contractAddress from "../contracts/contract-address.json";
+import Artifact from "../../contracts/WithdrawalContract.json";
+import contractAddress from "../../contracts/contract-address.json";
 import { useState, useEffect } from "react";
 
 import { ethers } from "ethers";
+import Link from "next/link";
 
 export default () => {
     const [qs, setQ] = useState([]);
@@ -11,7 +12,6 @@ export default () => {
     }, []);
     
     async function getAllQuesitons() {
-        const ethers = require("ethers");
         //After adding your Hardhat network to your metamask, this code will get providers and signers
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
@@ -40,7 +40,8 @@ export default () => {
     return (
         <div>
             Enter
-            {qs.map((q,i) => (<div key={i}>{q.text}</div>))}
+            
+            {qs.map((q,i) => (<Link href={`./questions/${q.tokenId}`} key={i}><div>{q.text}</div></Link>))}
         </div>      
     );
 }
