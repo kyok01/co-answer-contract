@@ -11,9 +11,8 @@ export default ({ pId }) => {
   const [answers, setA] = useState([]);
   useEffect(() => {
     getQuesitonForId();
-    getAnswerForId()
+    getAnswerForId();
   }, []);
-
 
   async function getQuesitonForId() {
     //After adding your Hardhat network to your metamask, this code will get providers and signers
@@ -57,26 +56,26 @@ export default ({ pId }) => {
     //create an NFT Token
     let transaction = await contract.getAllAnswers();
     let answerIds = [];
-    const rowAnswers = await Promise.all(transaction.filter(async (q, i) => {
-      await answerIds.push(i);
-      console.log(q)
-      console.log(q.tokenId.toNumber())
-      const bool = await q.tokenId.toNumber() === pId;
+
+    const rowAnswers = await filter(transaction, async (q, i) => {
+      answerIds.push(i);
+      const bool = (await q.tokenId.toNumber()) == pId;
       console.log(bool);
-      return false;
-  }));
-  console.log(rowAnswers);
-  
-  const answers = await Promise.all(rowAnswers.map(async (q, i) => {
-    let item = {
-        answerId: answerIds[i],
-        text: q.text,
-        sender: q.sender,
-    }
-    return item;
-}));
-  console.log(answers);
-  setA(answers);
+      return bool;
+    });
+
+    const answers = await Promise.all(
+      rowAnswers.map(async (q, i) => {
+        let item = {
+          answerId: answerIds[i],
+          text: q.text,
+          sender: q.sender,
+        };
+        return item;
+      })
+    );
+    console.log(answers);
+    setA(answers);
   }
 
   async function handleSubmit(event) {
@@ -98,11 +97,11 @@ export default ({ pId }) => {
       const qacId = event.target.qacId.value;
 
       let struct;
-      if(qacType === "question") {
+      if (qacType === "question") {
         struct = await contract.getQuestionForId(qacId);
-      }else if (qacType === "answer"){
+      } else if (qacType === "answer") {
         struct = await contract.getAnswerForAnswerId(qacId);
-      }else if (qacType === "comment"){
+      } else if (qacType === "comment") {
         struct = await contract.getCommentForCommentId(qacId);
       }
       const refAddr = struct.sender;
@@ -112,7 +111,7 @@ export default ({ pId }) => {
         answerText,
         qacType,
         qacId,
-        refAddr,
+        refAddr
       );
       await transaction.wait();
 
@@ -134,7 +133,9 @@ export default ({ pId }) => {
       </div>
       <p>=======</p>
       <div>
-        {answers.map((answer, i) => (<div key={i}>{answer.text}</div>))}
+        {answers.map((answer, i) => (
+          <div key={i}>{answer.text}</div>
+        ))}
       </div>
       <div>
         <form onSubmit={handleSubmit}>
@@ -166,3 +167,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return { props: { pId: id } };
 };
+
+// helper function
+async function filter(arr, callback) {
+  const fail = Symbol();
+  return (
+    await Promise.all(
+      arr.map(async (item) => ((await callback(item)) ? item : fail))
+    )
+  ).filter((i) => i !== fail);
+}
