@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 
 import { ethers } from "ethers";
 import Link from "next/link";
+import { Dropdown, Navbar } from "flowbite-react";
+import { Navbar2 } from "components/NavBar2";
 
 export default () => {
     const [qs, setQ] = useState([]);
@@ -39,7 +41,9 @@ export default () => {
 
     return (
         <div>
+            <Navbar2 />
             Enter
+           
             
             {qs.map((q,i) => (<Link href={`./questions/${q.tokenId}`} key={i}><div>{q.text}</div></Link>))}
         </div>      
